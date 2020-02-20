@@ -1,23 +1,32 @@
 import requests 
 import json 
 from Envrionment import Environment
+from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
-time_series_weekly = requests.get(f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=.INX&apikey={Environment.apikey}")
+# Get daily stock market data from alphavantage
+time_series_daily = requests.get(f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=.INX&apikey={Environment.apikey}")
 
-parsed_time_series = json.loads(time_series_weekly.content)['Time Series (Daily)']
+# Parse JSON and drill down into 'Time Series (Daily)' dictionary
+parsed_time_series = json.loads(time_series_daily.content)['Time Series (Daily)']
 
-for date in parsed_time_series:
-    print(date)
-    print(parsed_time_series[date]['4. close'])
+# Cast dictionary keys to list of strings (dates)
+date_strings = list(parsed_time_series.keys())
 
-# print(test)
+# Cast dictionary values to list of strings (all daily market values)
+time_series_vals = list(parsed_time_series.values())
 
-# r1 = { 'fname' : 'Kent', 'lname' : 'Johnson' }
-# r2 = { 'fname' : 'Negroup', 'lname' : None }
-# data = [ r1, r2 ]
+# Transform list of string to list of matplotlib.dates
+dates = list(map((lambda date_string: mdates.datestr2num(date_string)), date_strings))
 
-# # Suppose I want to find everyone whose first name is 'Kent'. This is easy to do with a list comprehension:
+# Transform daily market dictionaries to only include closing vals
+mkt_close_values = list(map(lambda vals: float(vals['4. close']), time_series_vals))
 
-# test = [ r for r in data if r['fname'] == 'Kent' ]
+# Configure x axis
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
 
-# print(test)
+# Plot
+plt.plot(dates, mkt_close_values)
+plt.show()
