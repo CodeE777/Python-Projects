@@ -30,6 +30,14 @@ if str("Management’s Discussion and Analysis of Financial Condition and Result
                         """)
             print("line{}: {}".format(cnt, line.strip()))
 
+
+with open('output.txt', 'w') as fp:
+    writer = csv.DictWriter(fp, myfile)
+    writer.writeheader()
+    writer.writerows(line)
+
 myfile.close()
+
+
 
 
